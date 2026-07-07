@@ -9,9 +9,11 @@ local edges = {
   right = { command = "L", resize = "vertical resize ", vertical = true },
 }
 
+local edge_order = { "bottom", "top", "left", "right" }
+
 local default_config = {
   defaults = { focus = true, wait = 3000 },
-  layers = { "bottom", "top", "left", "right" },
+  layers = edge_order,
   positions = {
     left = 0.25,
     right = 0.25,
@@ -22,11 +24,10 @@ local default_config = {
 }
 
 local state = {
-  defaults = { focus = true, wait = 3000 },
+  config = {},
   items = {},
   layer_ranks = {},
   panels = {},
-  positions = {},
   waiting = {},
 }
 
@@ -39,7 +40,7 @@ local function winbar_title(title)
 end
 
 local function configured_size(item)
-  local size = item.spec.size or state.positions[item.spec.position]
+  local size = item.spec.size or state.config.positions[item.spec.position]
 
   if not size then
     return
@@ -196,7 +197,7 @@ local function build_layer_ranks(layers)
     end
   end
 
-  for _, position in ipairs(default_config.layers) do
+  for _, position in ipairs(edge_order) do
     if not ranks[position] then
       rank = rank + 1
       ranks[position] = rank
@@ -233,13 +234,11 @@ local function build_registry(panels)
 end
 
 function Panels.setup(config)
-  config = vim.tbl_deep_extend("force", default_config, config or {})
+  state.config = vim.tbl_deep_extend("force", default_config, config or {})
 
-  state.defaults = config.defaults
-  state.layer_ranks = build_layer_ranks(config.layers)
-  state.positions = config.positions
+  state.layer_ranks = build_layer_ranks(state.config.layers)
   state.waiting = {}
-  build_registry(config.panels)
+  build_registry(state.config.panels)
 
   vim.api.nvim_create_autocmd(events, {
     group = vim.api.nvim_create_augroup("PanelsNvim", { clear = true }),
@@ -256,7 +255,7 @@ function Panels.open(id, opener, opts, ...)
     error("unknown panel: " .. id)
   end
 
-  opts = vim.tbl_extend("force", state.defaults, opts or {})
+  opts = vim.tbl_extend("force", state.config.defaults, opts or {})
 
   local tabpage = vim.api.nvim_get_current_tabpage()
   local win = find_win(id, tabpage)
