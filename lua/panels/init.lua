@@ -70,6 +70,14 @@ local function panel_size(win, item, configured)
   return configured_size(item)
 end
 
+local function resize(win, item, size)
+  if size then
+    vim.api.nvim_win_call(win, function()
+      vim.cmd(item.edge.resize .. size)
+    end)
+  end
+end
+
 local function apply_options(win, item)
   local spec = item.spec
   local wo = spec.wo or {}
@@ -97,14 +105,38 @@ local function place(win, item, configured)
 
   vim.api.nvim_win_call(win, function()
     vim.cmd.wincmd(item.edge.command)
-
-    if size then
-      vim.cmd(item.edge.resize .. size)
-    end
   end)
 
+  resize(win, item, size)
   vim.w[win].panels_id = item.id
   apply_options(win, item)
+end
+
+local function place_group(group, configured)
+  local anchor = group[1]
+  local sizes = {}
+
+  for index, entry in ipairs(group) do
+    sizes[index] = panel_size(entry.win, entry.item, configured)
+  end
+
+  place(anchor.win, anchor.item, configured)
+
+  for index = 2, #group do
+    local entry = group[index]
+
+    vim.fn.win_splitmove(entry.win, anchor.win, {
+      rightbelow = true,
+      vertical = not entry.item.edge.vertical,
+    })
+
+    vim.w[entry.win].panels_id = entry.item.id
+    apply_options(entry.win, entry.item)
+  end
+
+  for index, entry in ipairs(group) do
+    resize(entry.win, entry.item, sizes[index])
+  end
 end
 
 local function matches(win, item)
@@ -124,13 +156,26 @@ end
 
 local function arrange(configured)
   local wins = vim.api.nvim_tabpage_list_wins(0)
+  local groups = {}
+  local positions = {}
 
   for _, item in ipairs(state.items) do
     for _, win in ipairs(wins) do
       if matches(win, item) then
-        place(win, item, configured)
+        local position = item.spec.position
+
+        if not groups[position] then
+          groups[position] = {}
+          positions[#positions + 1] = position
+        end
+
+        table.insert(groups[position], { item = item, win = win })
       end
     end
+  end
+
+  for _, position in ipairs(positions) do
+    place_group(groups[position], configured)
   end
 end
 
