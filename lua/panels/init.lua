@@ -3,10 +3,10 @@ local Panels = {}
 local events = { "BufWinEnter", "FileType", "TermOpen", "TabEnter", "WinNew" }
 
 local edges = {
-  left = { command = "H", rank = 1, resize = "vertical resize ", vertical = true },
-  right = { command = "L", rank = 2, resize = "vertical resize ", vertical = true },
-  bottom = { command = "J", rank = 3, resize = "resize " },
-  top = { command = "K", rank = 4, resize = "resize " },
+  bottom = { command = "J", rank = 1, resize = "resize " },
+  top = { command = "K", rank = 2, resize = "resize " },
+  left = { command = "H", rank = 3, resize = "vertical resize ", vertical = true },
+  right = { command = "L", rank = 4, resize = "vertical resize ", vertical = true },
 }
 
 local state = {
