@@ -9,7 +9,17 @@ local edges = {
   right = { command = "L", resize = "vertical resize ", vertical = true },
 }
 
-local default_layers = { "bottom", "top", "left", "right" }
+local default_config = {
+  defaults = { focus = true, wait = 3000 },
+  layers = { "bottom", "top", "left", "right" },
+  positions = {
+    left = 0.25,
+    right = 0.25,
+    bottom = 12,
+    top = 10,
+  },
+  panels = {},
+}
 
 local state = {
   defaults = { focus = true, wait = 3000 },
@@ -172,8 +182,6 @@ local function wait_for(id, tabpage, timeout)
 end
 
 local function build_layer_ranks(layers)
-  layers = layers or default_layers
-
   local ranks = {}
   local rank = 0
 
@@ -188,7 +196,7 @@ local function build_layer_ranks(layers)
     end
   end
 
-  for _, position in ipairs(default_layers) do
+  for _, position in ipairs(default_config.layers) do
     if not ranks[position] then
       rank = rank + 1
       ranks[position] = rank
@@ -225,13 +233,13 @@ local function build_registry(panels)
 end
 
 function Panels.setup(config)
-  config = config or {}
+  config = vim.tbl_deep_extend("force", default_config, config or {})
 
-  state.defaults = vim.tbl_extend("force", { focus = true, wait = 3000 }, config.defaults or {})
+  state.defaults = config.defaults
   state.layer_ranks = build_layer_ranks(config.layers)
-  state.positions = config.positions or {}
+  state.positions = config.positions
   state.waiting = {}
-  build_registry(config.panels or {})
+  build_registry(config.panels)
 
   vim.api.nvim_create_autocmd(events, {
     group = vim.api.nvim_create_augroup("PanelsNvim", { clear = true }),

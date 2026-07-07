@@ -37,13 +37,6 @@ With `lazy.nvim`:
 {
   "so1ve/panels.nvim",
   opts = {
-    layers = { "bottom", "top", "left", "right" },
-    positions = {
-      left = 0.25,
-      right = 0.25,
-      bottom = 12,
-      top = 10,
-    },
     panels = {
       quickfix = { position = "bottom", ft = "qf", title = "Quickfix" },
     },
@@ -57,13 +50,6 @@ Configure the panels you want to manage:
 
 ```lua
 require("panels").setup({
-  layers = { "bottom", "top", "left", "right" },
-  positions = {
-    left = 0.25,
-    right = 0.25,
-    bottom = 12,
-    top = 10,
-  },
   panels = {
     quickfix = {
       title = "Quickfix",
@@ -115,7 +101,12 @@ require("panels").setup({
     wait = 3000,
   },
   layers = { "bottom", "top", "left", "right" },
-  positions = {},
+  positions = {
+    left = 0.25,
+    right = 0.25,
+    bottom = 12,
+    top = 10,
+  },
   panels = {},
 })
 ```
