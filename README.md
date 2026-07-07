@@ -37,6 +37,7 @@ With `lazy.nvim`:
 {
   "so1ve/panels.nvim",
   opts = {
+    layers = { "bottom", "top", "left", "right" },
     positions = {
       left = 0.25,
       right = 0.25,
@@ -56,6 +57,7 @@ Configure the panels you want to manage:
 
 ```lua
 require("panels").setup({
+  layers = { "bottom", "top", "left", "right" },
   positions = {
     left = 0.25,
     right = 0.25,
@@ -112,6 +114,7 @@ require("panels").setup({
     focus = true,
     wait = 3000,
   },
+  layers = { "bottom", "top", "left", "right" },
   positions = {},
   panels = {},
 })
@@ -127,6 +130,8 @@ Panel fields:
 - `wo`: optional window-local options applied to the panel window; set `winbar = false` to disable the generated title
 
 Global `positions` provide default sizes by edge. A panel-local `size` overrides its edge default.
+
+`layers` controls which edges cover other edges. Earlier entries are placed first; later entries stay outside them. The default keeps side panels outside top and bottom panels.
 
 ## API
 

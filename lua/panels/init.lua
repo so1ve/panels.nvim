@@ -3,15 +3,18 @@ local Panels = {}
 local events = { "BufWinEnter", "FileType", "TermOpen", "TabEnter", "WinNew" }
 
 local edges = {
-  bottom = { command = "J", rank = 1, resize = "resize " },
-  top = { command = "K", rank = 2, resize = "resize " },
-  left = { command = "H", rank = 3, resize = "vertical resize ", vertical = true },
-  right = { command = "L", rank = 4, resize = "vertical resize ", vertical = true },
+  bottom = { command = "J", resize = "resize " },
+  top = { command = "K", resize = "resize " },
+  left = { command = "H", resize = "vertical resize ", vertical = true },
+  right = { command = "L", resize = "vertical resize ", vertical = true },
 }
+
+local default_layers = { "bottom", "top", "left", "right" }
 
 local state = {
   defaults = { focus = true, wait = 3000 },
   items = {},
+  layer_ranks = {},
   panels = {},
   positions = {},
   waiting = {},
@@ -168,6 +171,33 @@ local function wait_for(id, tabpage, timeout)
   schedule()
 end
 
+local function build_layer_ranks(layers)
+  layers = layers or default_layers
+
+  local ranks = {}
+  local rank = 0
+
+  for _, position in ipairs(layers) do
+    if not edges[position] then
+      error("invalid panel layer: " .. tostring(position))
+    end
+
+    if not ranks[position] then
+      rank = rank + 1
+      ranks[position] = rank
+    end
+  end
+
+  for _, position in ipairs(default_layers) do
+    if not ranks[position] then
+      rank = rank + 1
+      ranks[position] = rank
+    end
+  end
+
+  return ranks
+end
+
 local function build_registry(panels)
   state.items = {}
   state.panels = {}
@@ -179,18 +209,18 @@ local function build_registry(panels)
       error("invalid panel position for " .. id .. ": " .. tostring(spec.position))
     end
 
-    local item = { edge = edge, id = id, spec = spec }
+    local item = { edge = edge, id = id, rank = state.layer_ranks[spec.position], spec = spec }
 
     state.items[#state.items + 1] = item
     state.panels[id] = item
   end
 
   table.sort(state.items, function(a, b)
-    if a.edge.rank == b.edge.rank then
+    if a.rank == b.rank then
       return a.id < b.id
     end
 
-    return a.edge.rank < b.edge.rank
+    return a.rank < b.rank
   end)
 end
 
@@ -198,6 +228,7 @@ function Panels.setup(config)
   config = config or {}
 
   state.defaults = vim.tbl_extend("force", { focus = true, wait = 3000 }, config.defaults or {})
+  state.layer_ranks = build_layer_ranks(config.layers)
   state.positions = config.positions or {}
   state.waiting = {}
   build_registry(config.panels or {})
