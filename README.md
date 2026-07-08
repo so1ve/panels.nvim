@@ -36,6 +36,7 @@ With `lazy.nvim`:
 ```lua
 {
   "so1ve/panels.nvim",
+  event = "VeryLazy",
   opts = {
     panels = {
       quickfix = { position = "bottom", ft = "qf", title = "Quickfix" },
