@@ -100,6 +100,24 @@ local function apply_options(win, item)
   end
 end
 
+local function map(mode, lhs, rhs, opts)
+  for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(opts.buffer, mode)) do
+    if mapping.lhs == lhs then
+      return
+    end
+  end
+
+  vim.keymap.set(mode, lhs, rhs, opts)
+end
+
+local function apply_keymaps(win)
+  local buf = vim.api.nvim_win_get_buf(win)
+
+  map("n", "q", function()
+    vim.cmd.close()
+  end, { buffer = buf, desc = "Close panel", silent = true })
+end
+
 local function place(win, item, configured)
   local size = panel_size(win, item, configured)
 
@@ -110,6 +128,7 @@ local function place(win, item, configured)
   resize(win, item, size)
   vim.w[win].panels_id = item.id
   apply_options(win, item)
+  apply_keymaps(win)
 end
 
 local function place_group(group, configured)
@@ -132,6 +151,7 @@ local function place_group(group, configured)
 
     vim.w[entry.win].panels_id = entry.item.id
     apply_options(entry.win, entry.item)
+    apply_keymaps(entry.win)
   end
 
   for index, entry in ipairs(group) do
