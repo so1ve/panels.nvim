@@ -17,7 +17,7 @@ local default_config = {
   positions = {
     left = 0.25,
     right = 0.25,
-    bottom = 12,
+    bottom = 1 / 3,
     top = 10,
   },
   panels = {},
