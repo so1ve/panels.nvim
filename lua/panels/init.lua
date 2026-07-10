@@ -12,7 +12,7 @@ local edges = {
 local edge_order = { "bottom", "top", "left", "right" }
 
 local default_config = {
-  defaults = { focus = true, wait = 3000 },
+  defaults = { focus = true, reuse = true, wait = 3000 },
   layers = edge_order,
   positions = {
     left = 0.25,
@@ -323,11 +323,11 @@ function Panels.open(id, opener, opts, ...)
   opts = vim.tbl_extend("force", state.config.defaults, opts or {})
 
   local tabpage = vim.api.nvim_get_current_tabpage()
-  local win = find_win(id, tabpage)
+  local existing = find_win(id, tabpage)
 
-  if win then
+  if existing and opts.reuse ~= false then
     if opts.focus ~= false then
-      vim.api.nvim_set_current_win(win)
+      vim.api.nvim_set_current_win(existing)
     end
 
     return
@@ -343,7 +343,8 @@ function Panels.open(id, opener, opts, ...)
   end
 
   arrange()
-  win = find_win(id, tabpage)
+
+  local win = find_win(id, tabpage)
 
   if opts.focus == false then
     if vim.api.nvim_win_is_valid(previous) then
@@ -355,7 +356,7 @@ function Panels.open(id, opener, opts, ...)
 
   if win then
     vim.api.nvim_set_current_win(win)
-  else
+  elseif not existing then
     wait_for(id, tabpage, opts.wait)
   end
 

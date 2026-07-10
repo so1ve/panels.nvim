@@ -77,6 +77,19 @@ vim.keymap.set("n", "<leader>q", function()
 end)
 ```
 
+Set `reuse = false` when the delegated action already controls whether its panel is visible:
+
+```lua
+vim.keymap.set("n", "<leader>tt", function()
+  require("panels").open("terminal", function()
+    Snacks.terminal()
+  end, { reuse = false })
+end)
+```
+
+With reuse disabled, `open` always runs the delegated action. Closing an existing panel is treated
+as intentional, so panels.nvim will not wait for it to reappear or force focus back into it.
+
 Use `focus = false` when an opener should create or reveal a panel without stealing focus:
 
 ```lua
@@ -99,6 +112,7 @@ Default configuration:
 require("panels").setup({
   defaults = {
     focus = true,
+    reuse = true,
     wait = 3000,
   },
   layers = { "bottom", "top", "left", "right" },
@@ -133,13 +147,15 @@ Registers panels and starts the lightweight window arrangement autocmds.
 
 ### `open(id, opener, opts?, ...)`
 
-Focuses an existing panel with the same id, or runs `opener` when no matching panel exists.
+By default, focuses an existing panel with the same id, or runs `opener` when no matching panel
+exists. Set `reuse = false` to run the opener even when a matching panel is already visible.
 
 `opener` can be a command string or a function. Extra arguments are passed to function openers.
 
 Options:
 
 - `focus`: defaults to `true`; set to `false` to return to the previous window after opening
+- `reuse`: defaults to `true`; set to `false` to always run the opener
 - `wait`: defaults to `3000`; milliseconds to wait for async openers that create the panel later
 
 ### `equalize()`
