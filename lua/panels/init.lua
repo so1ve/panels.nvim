@@ -118,20 +118,13 @@ local function apply_keymaps(win)
   end, { buffer = buf, desc = "Close panel", silent = true })
 end
 
-local function place(win, item, configured)
-  local size = panel_size(win, item, configured)
-
-  vim.api.nvim_win_call(win, function()
-    vim.cmd.wincmd(item.edge.command)
-  end)
-
-  resize(win, item, size)
+local function configure_panel(win, item)
   vim.w[win].panels_id = item.id
   apply_options(win, item)
   apply_keymaps(win)
 end
 
-local function place_group(group, configured)
+local function place(group, configured)
   local anchor = group[1]
   local sizes = {}
 
@@ -139,7 +132,11 @@ local function place_group(group, configured)
     sizes[index] = panel_size(entry.win, entry.item, configured)
   end
 
-  place(anchor.win, anchor.item, configured)
+  vim.api.nvim_win_call(anchor.win, function()
+    vim.cmd.wincmd(anchor.item.edge.command)
+  end)
+
+  configure_panel(anchor.win, anchor.item)
 
   for index = 2, #group do
     local entry = group[index]
@@ -149,9 +146,7 @@ local function place_group(group, configured)
       vertical = not entry.item.edge.vertical,
     })
 
-    vim.w[entry.win].panels_id = entry.item.id
-    apply_options(entry.win, entry.item)
-    apply_keymaps(entry.win)
+    configure_panel(entry.win, entry.item)
   end
 
   for index, entry in ipairs(group) do
@@ -195,7 +190,7 @@ local function arrange(configured)
   end
 
   for _, position in ipairs(positions) do
-    place_group(groups[position], configured)
+    place(groups[position], configured)
   end
 end
 
