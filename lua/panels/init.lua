@@ -29,6 +29,7 @@ local state = {
   layer_ranks = {},
   panels = {},
   waiting = {},
+  scheduled = false,
 }
 
 local function is_normal_win(win)
@@ -220,7 +221,13 @@ local function check_waiting()
 end
 
 local function schedule()
+  if state.scheduled then
+    return
+  end
+
+  state.scheduled = true
   vim.schedule(function()
+    state.scheduled = false
     arrange()
     check_waiting()
   end)
