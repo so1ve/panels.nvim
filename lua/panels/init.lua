@@ -143,7 +143,7 @@ local function place(group, configured)
     local entry = group[index]
     local command = ("noautocmd call win_splitmove(%d, %d, {'rightbelow': 1, 'vertical': %d})"):format(
       entry.win,
-      anchor.win,
+      group[index - 1].win,
       entry.item.edge.vertical and 0 or 1
     )
 
