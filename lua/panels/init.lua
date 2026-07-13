@@ -141,12 +141,13 @@ local function place(group, configured)
 
   for index = 2, #group do
     local entry = group[index]
+    local command = ("noautocmd call win_splitmove(%d, %d, {'rightbelow': 1, 'vertical': %d})"):format(
+      entry.win,
+      anchor.win,
+      entry.item.edge.vertical and 0 or 1
+    )
 
-    vim.fn.win_splitmove(entry.win, anchor.win, {
-      rightbelow = true,
-      vertical = not entry.item.edge.vertical,
-    })
-
+    vim.cmd(command)
     configure_panel(entry.win, entry.item)
   end
 
